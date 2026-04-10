@@ -1,0 +1,26 @@
+# === Credentials & secrets ===
+env.local
+.env
+.env.*
+!.env.example
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# === Claude Code local state ===
+.claude/settings.local.json
+
+# === Workflow data (personal/client) ===
+# Les blueprints Make et exports n8n contiennent des donnees client
+workflows/*/make-blueprint.json
+workflows/*/n8n-workflow.json
+workflows/*/*.blueprint/
+workflows/*/*.blueprint.json
+workflows/*/reference-screenshot.png
+
+# === Eval workspaces (resultats de tests locaux) ===
+*-workspace/
+
+# === Notes de session personnelles ===
+docs/TODO-prochaine-session.md
