@@ -72,7 +72,19 @@ workflows/<nom-workflow>/
 
 ### Phase 1 : Analyse
 1. Lire le `make-blueprint.json` du workflow cible
-2. Identifier : declencheur, modules, connexions, APIs externes, transformations de donnees
+
+**1.a — Blueprint absent du dossier**
+Si le dossier du workflow ne contient pas de `make-blueprint.json` :
+- **Demander a l'utilisateur le nom exact de l'automatisation** a migrer (ou son ID de scenario Make).
+- Recuperer le blueprint directement via le **MCP Make** (`mcp.make.com`) et le sauvegarder dans le dossier du workflow sous `make-blueprint.json`, OU analyser directement le scenario dans Make via le MCP si l'export n'est pas disponible.
+- Ne jamais inventer la structure du scenario : sans blueprint local ni acces MCP au scenario, demander a l'utilisateur de fournir l'export.
+
+**1.b — Enrichir la comprehension de la source (Make)**
+Apres lecture du `make-blueprint.json`, lorsque le blueprint contient des elements non triviaux (expressions IML, routing/filtres, Iterator/Aggregator, modules custom ou *Make an API Call*), s'appuyer sur les skills `make-scenario-building` et `make-module-configuring` pour interpreter precisement la semantique des modules, du mapping et des expressions **avant** de concevoir l'equivalent n8n.
+- Objectif : comprendre fidelement la source, **pas** influencer le choix des nodes n8n (la cible reste regie par le MCP n8n + `docs/n8n-node-patterns.md`).
+- Le MCP Make (`mcp.make.com`) est optionnel : ne l'utiliser que pour recuperer un blueprint a jour depuis le compte, si le fichier local est douteux/incomplet.
+
+2. Identifier : declencheur, modules, connexions, APIs externes, transformations de donnees (consulter `docs/make-to-n8n-mapping.md` pour les equivalences modules + IML)
 3. Utiliser les MCP pertinents pour recuperer du contexte (ex: schema Airtable, structure Notion)
 4. Presenter a l'utilisateur un resume du role de l'automatisation
 
@@ -103,7 +115,12 @@ Poser ces questions :
 3. Verifier chaque node individuellement (entree/sortie)
 4. Tester les cas limites (donnees vides, erreurs API, timeouts)
 5. Verifier les error handling et retries
-6. Iterer jusqu'a ce que le workflow fonctionne completement
+6. **Verification de parite (golden run)** — prouver la *fidelite* a Make, pas seulement l'absence d'erreur :
+   - Recuperer une execution Make connue (memes donnees d'entree) via le MCP Make, ou un echantillon d'entree/sortie fourni par l'utilisateur.
+   - Rejouer le workflow n8n sur **les memes entrees** et **comparer la sortie** (champs produits, valeurs ecrites dans les services cibles, emails) a celle de Make.
+   - Valider sur **2+ iterations avec donnees distinctes** pour exclure un bug sticky-item / paired-item.
+   - Documenter les ecarts attendus (ameliorations volontaires) vs ecarts non voulus (bugs a corriger).
+7. Iterer jusqu'a ce que le workflow fonctionne completement ET que la parite soit verifiee
 
 ### Phase 6 : Finalisation
 1. Activer le workflow si schedule/webhook
@@ -129,5 +146,6 @@ Poser ces questions :
 - `docs/migration-tracker.md` — Etat d'avancement de toutes les migrations
 - `docs/credentials-registry.md` — Registre de toutes les credentials
 - `docs/n8n-node-patterns.md` — **Reference obligatoire** : configurations exactes des nodes n8n
+- `docs/make-to-n8n-mapping.md` — Equivalences modules Make → nodes n8n + cheatsheet IML → expressions n8n (consulter en Phase 1)
 - `docs/n8n-instance.md` — Informations techniques sur l'instance n8n
 - `templates/` — Templates pour plans et checklists

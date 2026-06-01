@@ -19,9 +19,17 @@ Avant toute chose, verifie si ce workflow a deja ete migre :
 ## Etape 1 : Analyse du blueprint Make
 
 1. Lis le fichier `workflows/$ARGUMENTS/make-blueprint.json`
+
+   **1.a — Blueprint absent du dossier** : si `workflows/$ARGUMENTS/make-blueprint.json` n'existe pas :
+   - **Demande a l'utilisateur le nom exact de l'automatisation** (ou son ID de scenario Make).
+   - Recupere le blueprint via le **MCP Make** (`mcp.make.com`) et sauvegarde-le sous `workflows/$ARGUMENTS/make-blueprint.json`, OU analyse directement le scenario dans Make via le MCP si l'export n'est pas disponible.
+   - N'invente jamais la structure : sans blueprint local ni acces MCP, demande l'export a l'utilisateur. **ATTENDS sa reponse.**
+
+   **1.b — Enrichir la comprehension de la source** : si le blueprint contient des elements non triviaux (expressions IML, routing/filtres, Iterator/Aggregator, modules custom ou *Make an API Call*), appuie-toi sur les skills `make-scenario-building` et `make-module-configuring` pour interpreter precisement la semantique avant de concevoir l'equivalent n8n. Objectif : comprendre la source, pas influencer le choix des nodes n8n.
+
 2. Identifie :
    - Le declencheur (webhook, schedule, instant, etc.)
-   - Chaque module Make et son equivalent n8n
+   - Chaque module Make et son equivalent n8n (consulte `docs/make-to-n8n-mapping.md` pour les equivalences modules + IML)
    - Les APIs externes appelees
    - Les transformations de donnees (filtres, routeurs, aggregateurs)
    - Les credentials necessaires
@@ -74,8 +82,9 @@ Puis pose ces questions :
 3. Verifie chaque node : entrees, sorties, erreurs
 4. Teste les cas limites
 5. Si erreur : corrige et re-teste
-6. Itere jusqu'a ce que TOUS les tests passent
-7. Utilise dev-browser si besoin de verifier visuellement des resultats
+6. **Parite golden run** : recupere une execution Make connue (memes entrees) via le MCP Make ou un echantillon fourni, rejoue le workflow n8n sur les memes entrees, et compare la sortie (champs, ecritures Airtable/Notion/Freshdesk/HubSpot, emails). Valide sur 2+ iterations distinctes. Documente les ecarts voulus vs bugs.
+7. Itere jusqu'a ce que TOUS les tests passent ET que la parite soit verifiee
+8. Utilise dev-browser si besoin de verifier visuellement des resultats
 
 ## Etape 6 : Finalisation
 
